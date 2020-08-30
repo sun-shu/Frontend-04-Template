@@ -1,0 +1,206 @@
+<style>
+    .cell {
+        background: green;
+        width: 100px;
+        height: 100px;
+        display: inline-block;
+        border: solid 1px white;
+        vertical-align: middle;
+
+        line-height: 100px;
+        font-size: 50px;
+        text-align: center;
+    }
+</style>
+
+<div id="board"></div>
+
+<script>
+    //初始化棋盘 绑定点击事件重新渲染棋盘
+    //如何判断是否赢：3横3纵2斜 满足同色
+
+
+    // 0 1（O） 2（×）分别表示棋子的三种状态
+    let pattern = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0]
+    ]
+
+    console.log(pattern);
+
+    function show() {
+        let board = document.getElementById('board');
+
+        board.innerHTML = "";
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                let cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.innerText =
+                    pattern[i][j] == 2 ? '×' :
+                        pattern[i][j] == 1 ? 'O' : '';
+                cell.addEventListener('click', () => move(i, j))
+                board.appendChild(cell);
+            }
+            board.appendChild(document.createElement('br'));
+        }
+    }
+
+    show();
+
+    //落子是1 2 所以默认先落1
+    let color = 1;
+
+    function move(x, y) {
+        pattern[x][y] = color;
+        if (check(pattern, color)) {
+            alert(color == 2 ? '× IS Win！' : 'O IS Win！');
+        }
+
+        //置换一下颜色
+        color = 3 - color;
+
+        console.log(pattern);
+        console.log(bestChoice(pattern, color));
+
+        //重新渲染
+        show();
+
+        if (willWin(pattern, color)) {
+            alert(color == 2 ? "× will win!" : "O will win!");
+        }
+        computerMove();
+    }
+
+    function clone(pattern) {
+        return JSON.parse(JSON.stringify(pattern));
+    }
+
+    function check(pattern, color) {
+        //先判断横行 有没有空或者其他颜色的子
+        for (let i = 0; i < 3; i++) {
+            let win = true;
+            for (let j = 0; j < 3; j++) {
+                if (pattern[i][j] !== color) {
+                    win = false;
+                }
+            }
+
+            if (win) {
+                return true;
+            }
+        }
+
+        //判断三列 有没有空或者其他颜色的子 实质是把i j 调换 竖着查
+        for (let i = 0; i < 3; i++) {
+            let win = true;
+            for (let j = 0; j < 3; j++) {
+                if (pattern[j][i] !== color) {
+                    win = false;
+                }
+            }
+
+            if (win) {
+                return true;
+            }
+        }
+
+        //判断左-右斜向 有没有空或者其他颜色的子 实质是把i j 调换 竖着查
+        {
+            let win = true;
+            for (let i = 0; i < 3; i++) {
+
+                if (pattern[i][i] !== color) {
+                    win = false;
+                }
+            }
+
+            if (win) {
+                return true;
+            }
+        }
+
+        //判断右-左斜向 有没有空或者其他颜色的子
+        {
+            let win = true;
+            for (let i = 0; i < 3; i++) {
+
+                if (pattern[i][2 - i] !== color) {
+                    win = false;
+                }
+            }
+
+            if (win) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function willWin(pattern, color) {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (pattern[i][j]) {
+                    continue;
+                }
+
+                let tem = clone(pattern);
+                tem[i][j] = color;
+                if (check(tem, color)) {
+                    return [i, j];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    function bestChoice(pattern, color) {
+        let p;
+        //p不返回null 说明有可以赢得点 这里做了一下赋值
+        if (p = willWin(pattern, color)) {
+            return {
+                result: 1,
+                point: p
+            }
+        }
+
+        let result = -2;
+        let point = null;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (pattern[i][j]) {
+                    continue;
+                }
+
+                let temp = clone(pattern);
+                temp[i][j] = color;
+                let r = bestChoice(temp, 3 - color).result;
+                if (-r > result) {
+                    result = -r;
+                    point = [i, j];
+                }
+            }
+        }
+
+        return {
+            result: point ? result : 0,
+            point: point
+        }
+    }
+
+    function computerMove() {
+        let choice = bestChoice(pattern, color)
+        if (choice.point) {
+            pattern[choice.point[0]][choice.point[1]] = color;
+            if (check(pattern, color)) {
+                alert(color == 2 ? "× will win!" : "O will win!");
+            }
+
+            color = 3- color;
+            show();
+        }
+    }
+</script>
