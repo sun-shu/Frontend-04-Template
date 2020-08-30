@@ -1,0 +1,9 @@
+line-height 和父元素高度一样 文字居中
+文字的CSS可以与其他CSS隔开
+inline-block 默认对齐方式是inline对齐 所以需要加vertical-align: middle对齐
+调试技巧 打一个断点 然后点击箭头+点的按钮 就是执行的下一步了
+innerHTML = "" 置空元素内容
+不要在循环里计算
+如果想使一个变量变成局部变量反复赋值 可以将使用它的代码块加个{} 限定作用域
+返回值要在同一维度
+JS 三种异步机制 callback promise async/await(实际上是promise的封装)
